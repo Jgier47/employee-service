@@ -23,7 +23,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Autowired private EmployeeRepository employeeRepository;
   @Autowired private EmployeeMapper employeeMapper;
-  @Autowired private WebClient webClient;
+  @Autowired private WebClient.Builder loadBalancedWebClientBuilder;
 
   @Override
   public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
@@ -46,9 +46,10 @@ public class EmployeeServiceImpl implements EmployeeService {
                     new ResourceNotFoundException("Employee", "employeeID", employeeId.toString()));
 
     DepartmentDTO departmentDTO =
-        webClient
+        loadBalancedWebClientBuilder
+            .build()
             .get()
-            .uri("http://localhost:8080/api/departments/" + employee.getDepartmentCode())
+            .uri("http://department-service/api/departments/" + employee.getDepartmentCode())
             .retrieve()
             .bodyToMono(DepartmentDTO.class)
             .block();
