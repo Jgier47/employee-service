@@ -11,10 +11,10 @@ import net.java.app.employee_service.exceptions.EmployeeAlreadyExistsException;
 import net.java.app.employee_service.exceptions.ResourceNotFoundException;
 import net.java.app.employee_service.mapper.EmployeeMapper;
 import net.java.app.employee_service.repository.EmployeeRepository;
+import net.java.app.employee_service.service.APIFeignClient;
 import net.java.app.employee_service.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @NoArgsConstructor
@@ -23,7 +23,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Autowired private EmployeeRepository employeeRepository;
   @Autowired private EmployeeMapper employeeMapper;
-  @Autowired private WebClient.Builder loadBalancedWebClientBuilder;
+  @Autowired private APIFeignClient apiFeignClient;
 
   @Override
   public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
@@ -45,14 +45,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 () ->
                     new ResourceNotFoundException("Employee", "employeeID", employeeId.toString()));
 
-    DepartmentDTO departmentDTO =
-        loadBalancedWebClientBuilder
-            .build()
-            .get()
-            .uri("http://department-service/api/departments/" + employee.getDepartmentCode())
-            .retrieve()
-            .bodyToMono(DepartmentDTO.class)
-            .block();
+    DepartmentDTO departmentDTO = apiFeignClient.getDepartment(employee.getDepartmentCode());
 
     return new ResponseEmployeeDepartmentDTO(
         employeeMapper.mapToEmployeeDto(employee), departmentDTO);
