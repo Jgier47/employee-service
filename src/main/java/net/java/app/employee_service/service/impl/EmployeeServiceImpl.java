@@ -3,12 +3,15 @@ package net.java.app.employee_service.service.impl;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import net.java.app.employee_service.dto.DepartmentDTO;
 import net.java.app.employee_service.dto.EmployeeDto;
+import net.java.app.employee_service.dto.ResponseEmployeeDepartmentDTO;
 import net.java.app.employee_service.entity.Employee;
 import net.java.app.employee_service.exceptions.EmployeeAlreadyExistsException;
 import net.java.app.employee_service.exceptions.ResourceNotFoundException;
 import net.java.app.employee_service.mapper.EmployeeMapper;
 import net.java.app.employee_service.repository.EmployeeRepository;
+import net.java.app.employee_service.service.APIFeignClient;
 import net.java.app.employee_service.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Autowired private EmployeeRepository employeeRepository;
   @Autowired private EmployeeMapper employeeMapper;
+  @Autowired private APIFeignClient apiFeignClient;
 
   @Override
   public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
@@ -33,7 +37,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   }
 
   @Override
-  public EmployeeDto getEmployeeById(Long employeeId) {
+  public ResponseEmployeeDepartmentDTO getEmployeeById(Long employeeId) {
     Employee employee =
         employeeRepository
             .findById(employeeId)
@@ -41,6 +45,9 @@ public class EmployeeServiceImpl implements EmployeeService {
                 () ->
                     new ResourceNotFoundException("Employee", "employeeID", employeeId.toString()));
 
-    return employeeMapper.mapToEmployeeDto(employee);
+    DepartmentDTO departmentDTO = apiFeignClient.getDepartment(employee.getDepartmentCode());
+
+    return new ResponseEmployeeDepartmentDTO(
+        employeeMapper.mapToEmployeeDto(employee), departmentDTO);
   }
 }
