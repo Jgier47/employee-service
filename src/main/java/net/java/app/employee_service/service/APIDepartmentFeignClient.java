@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "DEPARTMENT-SERVICE")
-public interface APIFeignClient {
-  Logger LOGGER = LoggerFactory.getLogger(APIFeignClient.class);
+public interface APIDepartmentFeignClient {
+  Logger LOGGER = LoggerFactory.getLogger(APIDepartmentFeignClient.class);
 
   @Retry(name = "DEPARTMENT-SERVICE")
   @CircuitBreaker(name = "DEPARTMENT-SERVICE", fallbackMethod = "getDepartmentByCodeFallback")

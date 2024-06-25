@@ -12,4 +12,5 @@ import lombok.Setter;
 public class ResponseEmployeeDepartmentDTO {
   private EmployeeDto employeeDto;
   private DepartmentDTO departmentDTO;
+  private OrganizationDto organizationDto;
 }
